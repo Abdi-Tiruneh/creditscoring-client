@@ -1,0 +1,65 @@
+HELP.md
+target/
+logs/
+.run/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# Ignore build artifacts
+target/
+build/
+
+# Ignore IDE-specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignore Maven-specific files
+mvnw
+mvnw.cmd
+.mvn/
+mvn/
+
+# Ignore Gradle-specific files
+.gradle/
+build.gradle
+gradlew
+gradlew.bat
+
+# Ignore test reports and coverage results
+/test-output/
+/jacoco/
+
+# Ignore test-specific configuration files
+src/test/resources/
+
+# Ignore test database files
+*.db
+
+# Ignore any other test-related files or directories
+**/*Test.*
+**/*Tests.*
