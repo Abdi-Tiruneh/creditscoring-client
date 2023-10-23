@@ -1,9 +1,10 @@
 package com.dxvalley.creditscoring;
 
 import com.dxvalley.creditscoring.userManager.role.Role;
-import com.dxvalley.creditscoring.userManager.user.Users;
 import com.dxvalley.creditscoring.userManager.role.RoleRepository;
 import com.dxvalley.creditscoring.userManager.user.UserRepository;
+import com.dxvalley.creditscoring.userManager.user.Users;
+import com.dxvalley.creditscoring.utils.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -64,6 +65,7 @@ public class ApplicationRunner {
                 .phoneNumber("+251912345678")
                 .organizationId("1234")
                 .role(role)
+                .userStatus(Status.ACTIVE)
                 .isEnabled(true)
                 .createdBy("System")
                 .build();
