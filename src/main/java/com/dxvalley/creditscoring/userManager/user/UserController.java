@@ -1,7 +1,12 @@
 package com.dxvalley.creditscoring.userManager.user;
 
-import com.dxvalley.creditscoring.userManager.user.dto.*;
+import com.dxvalley.creditscoring.userManager.user.dto.OwnerRegistrationReq;
+import com.dxvalley.creditscoring.userManager.user.dto.UserRegistrationReq;
+import com.dxvalley.creditscoring.userManager.user.dto.UserResponse;
+import com.dxvalley.creditscoring.userManager.user.dto.UserUpdateReq;
 import com.dxvalley.creditscoring.utils.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,54 +18,58 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
+@Tag(name = "User API. GOOD TO GO")
 public class UserController {
 
   private final UserService userService;
 
   @GetMapping({"/me"})
-  public ResponseEntity<UserResponse> getMe() {
+  public ResponseEntity<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> getMe() {
     return ResponseEntity.ok(userService.me());
   }
 
   @GetMapping({"/{id}"})
-  public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
+  public ResponseEntity<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> getById(@PathVariable Long id) {
     return ResponseEntity.ok(userService.getById(id));
   }
 
   @GetMapping("/organization")
-  public ResponseEntity<List<UserResponse>> getOrganizationUsers() {
-    List<UserResponse> users = userService.getOrganizationUsers();
+  public ResponseEntity<List<com.dxvalley.creditscoring.userManager.user.dto.UserResponse>> getOrganizationUsers() {
+    List<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> users = userService.getOrganizationUsers();
     return ResponseEntity.ok(users);
   }
 
   @PostMapping("/owner")
-  public ResponseEntity<Users> registerOwner(@RequestBody @Valid OwnerRegistrationReq ownerReq) {
-    Users owner = userService.registerOwner(ownerReq);
+  public ResponseEntity<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> registerOwner(@RequestBody @Valid OwnerRegistrationReq ownerReq) {
+    com.dxvalley.creditscoring.userManager.user.dto.UserResponse owner = userService.registerOwner(ownerReq);
     return ResponseEntity.status(HttpStatus.CREATED).body(owner);
   }
 
   @PostMapping
-  public ResponseEntity<Users> register(@RequestBody @Valid UserRegistrationReq userReq) {
-    Users user = userService.register(userReq);
+  public ResponseEntity<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> register(@RequestBody @Valid UserRegistrationReq userReq) {
+    UserResponse user = userService.register(userReq);
     return ResponseEntity.status(HttpStatus.CREATED).body(user);
   }
 
   @PutMapping
-  public ResponseEntity<UserResponse> editUser(@RequestBody @Valid UserUpdateReq updateReq) {
+  public ResponseEntity<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> editUser(@RequestBody @Valid UserUpdateReq updateReq) {
     return ResponseEntity.ok(userService.editUser(updateReq));
   }
 
-  @PutMapping({"/changePassword"})
-  public ResponseEntity<ApiResponse> changePassword(@RequestBody @Valid ChangePassword changePassword) {
-    return userService.changePassword(changePassword);
+  @PutMapping("/{id}/activate-ban")
+  @Operation(summary = "Ban/Activate User",
+          description = "Ban/Activate a User by ID.")
+  public ResponseEntity<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> activateBan(@PathVariable Long id) {
+    return ResponseEntity.ok(userService.activateBan(id));
   }
 
   @DeleteMapping({"/{id}"})
   public ResponseEntity<ApiResponse> deleteUser(@PathVariable Long id) {
     return userService.delete(id);
   }
-
 }
+
+
 
 //  private boolean isOwnAccount(String userName) {
 //    Authentication auth = SecurityContextHolder.getContext().getAuthentication();

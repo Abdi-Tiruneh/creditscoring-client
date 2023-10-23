@@ -21,6 +21,6 @@ public class OwnerRegistrationReq {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    @NotBlank(message = "Code number is required")
-    private String code;
+    @NotBlank(message = "customer Id is required")
+    private String customerId;
 }

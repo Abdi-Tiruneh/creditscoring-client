@@ -1,11 +1,15 @@
 package com.dxvalley.creditscoring.userManager.user;
 
+import com.dxvalley.creditscoring.customer.CustomerFeignClient;
+import com.dxvalley.creditscoring.emailManager.EmailService;
 import com.dxvalley.creditscoring.exceptions.customExceptions.ResourceAlreadyExistsException;
+import com.dxvalley.creditscoring.tokenManager.ConfirmationTokenService;
 import com.dxvalley.creditscoring.userManager.role.Role;
 import com.dxvalley.creditscoring.userManager.role.RoleService;
 import com.dxvalley.creditscoring.userManager.user.dto.*;
 import com.dxvalley.creditscoring.utils.ApiResponse;
 import com.dxvalley.creditscoring.utils.CurrentLoggedInUser;
+import com.dxvalley.creditscoring.utils.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,26 +28,33 @@ public class UserServiceImpl implements UserService {
     private final UserUtils userUtils;
     private final CurrentLoggedInUser currentLoggedInUser;
     private final PasswordEncoder passwordEncoder;
+    private final CustomerFeignClient customerFeignClient;
+    private final ConfirmationTokenService confirmationTokenService;
+    private final EmailService emailService;
 
     @Override
     @Transactional
-    public Users register(UserRegistrationReq userReq) {
+    public com.dxvalley.creditscoring.userManager.user.dto.UserResponse register(UserRegistrationReq userReq) {
         if (userUtils.isEmailTaken(userReq.getEmail()))
-            throw new ResourceAlreadyExistsException("Email is already taken");
+            throw new ResourceAlreadyExistsException("Email is already taken.");
 
         if (userUtils.isPhoneNumberTaken(userReq.getPhoneNumber()))
-            throw new ResourceAlreadyExistsException("Phone number is already taken");
+            throw new ResourceAlreadyExistsException("Phone number is already taken.");
 
         Role role = roleService.getRoleByName(userReq.getRoleName().toUpperCase());
         Users loggedInUser = currentLoggedInUser.getUser();
         Users user = userUtils.createUser(userReq, loggedInUser, role);
 
-        return userRepository.save(user);
+        Users savedUser = userRepository.save(user);
+
+        return UserMapper.toUserResponse(savedUser);
     }
 
     @Override
     @Transactional
-    public Users registerOwner(OwnerRegistrationReq ownerReq) {
+    public com.dxvalley.creditscoring.userManager.user.dto.UserResponse registerOwner(OwnerRegistrationReq ownerReq) {
+        customerFeignClient.activateCustomer(ownerReq.getCustomerId());
+
         if (userUtils.isEmailTaken(ownerReq.getEmail()))
             throw new ResourceAlreadyExistsException("Email is already taken");
 
@@ -52,11 +63,13 @@ public class UserServiceImpl implements UserService {
 
         Role role = roleService.getRoleByName("OWNER");
         Users user = userUtils.createUser(ownerReq, role);
-        return userRepository.save(user);
+
+        Users savedUser = userRepository.save(user);
+        return UserMapper.toUserResponse(savedUser);
     }
 
     @Override
-    public List<UserResponse> getOrganizationUsers() {
+    public List<com.dxvalley.creditscoring.userManager.user.dto.UserResponse> getOrganizationUsers() {
         Users loggedInUser = currentLoggedInUser.getUser();
         List<Users> users = userRepository.findByOrganizationId(loggedInUser.getOrganizationId());
         return users.stream()
@@ -67,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserResponse editUser(UserUpdateReq updateReq) {
+    public com.dxvalley.creditscoring.userManager.user.dto.UserResponse editUser(UserUpdateReq updateReq) {
         Users user = currentLoggedInUser.getUser();
 
         if (updateReq.getFullName() != null) {
@@ -99,31 +112,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse me() {
+    public com.dxvalley.creditscoring.userManager.user.dto.UserResponse activateBan(Long id) {
+        Users user = userUtils.getById(id);
+
+        if (user.getUserStatus() == Status.ACTIVE)
+            user.setUserStatus(Status.BANNED);
+        else
+            user.setUserStatus(Status.ACTIVE);
+
+        Users savedUser = userRepository.save(user);
+        return UserMapper.toUserResponse(savedUser);
+    }
+
+    @Override
+    public com.dxvalley.creditscoring.userManager.user.dto.UserResponse me() {
         Users user = currentLoggedInUser.getUser();
         return UserMapper.toUserResponse(user);
     }
 
     @Override
-    public UserResponse getById(Long userId) {
+    public com.dxvalley.creditscoring.userManager.user.dto.UserResponse getById(Long userId) {
         Users user = userUtils.getById(userId);
         return UserMapper.toUserResponse(user);
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<ApiResponse> changePassword(ChangePassword temp) {
-        Users user = currentLoggedInUser.getUser();
-
-        userUtils.validateOldPassword(user, temp.getOldPassword());
-
-        user.setPassword(passwordEncoder.encode(temp.getNewPassword()));
-        user.setUpdatedBy(user.getFullName());
-
-        userRepository.save(user);
-
-        return ApiResponse.success("Password Changed Successfully!");
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -139,53 +151,6 @@ public class UserServiceImpl implements UserService {
         return ApiResponse.success("Password Changed Successfully!");
     }
 
-
-//    @Override
-//    public ApiResponse<UserDTO> createUser(UserRequest tempUser) {
-//        Users userToSave = new Users();
-//        try {
-//            if (userRepository.findByUsername(tempUser.getEmail()) != null)
-//                throw new ResourceAlreadyExistsException("There is already a user with this email.");
-//
-//            LocalDateTime now = LocalDateTime.now();
-//            userToSave.setEmail(tempUser.getEmail());
-//            userToSave.setPhoneNumber(userToSave.getPhoneNumber());
-//            userToSave.setFullName(tempUser.getFullName());
-//            userToSave.setRoles(Collections.singletonList(roleRepository.findByRoleName(tempUser.getRoleName())));
-//            userToSave.setUsername(tempUser.getEmail());
-//            userToSave.setPassword(passwordEncoder.encode(tempUser.getPassword()));
-//            userToSave.setCreatedAt(now.format(dateTimeFormatter));
-//            userToSave.setIsEnabled(true);
-//            userToSave.setIsDeleted(false);
-//            if (tempUser.getRoleName().equals("teller")) {
-//                // add services with ids
-//
-//                List<Services> services = new ArrayList<>();
-//
-//                tempUser.getServices().forEach(serviceRequest -> {
-//                    Optional<Services> optionalService = servicesRepository.findById(serviceRequest.getServiceId());
-//                    optionalService.ifPresent(services::add);
-//                });
-//
-//                userToSave.setServices(services);
-//
-//            }
-//
-//            Users user = userRepository.save(userToSave);
-//
-//            logger.info("New User is added.");
-//            return new ApiResponse<>(200, "User added successfully.", new UserDTOMapper().apply(user));
-//
-//        } catch (ResourceAlreadyExistsException e) {
-//            // Handle the case where a User with the given email already exists
-//            logger.error("Error Adding User User: {}", e.getMessage());
-//            return new ApiResponse<>(409, "A User with this email already exists.", null);
-//        } catch (Exception e) {
-//            // Handle other unexpected errors
-//            logger.error("Error Adding User: {}", e.getMessage());
-//            return new ApiResponse<>(500, "An unexpected error occurred.", null);
-//        }
-//    }
 //
 //    @Override
 //    public List<UserDTO> getUsers() {
@@ -226,24 +191,6 @@ public class UserServiceImpl implements UserService {
 //                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("SuperAdmin"));
 //    }
 //
-//    @Override
-//    public ApiResponse<UserDTO> blockUser(UserRequest tempUser, Long userId) {
-//        try {
-//            Users user = userRepository.findByUserId(userId);
-//            if (user == null) {
-//                throw new ResourceNotFoundException("There is no user with this ID.");
-//            }
-//            user.setIsEnabled(tempUser.getIsEnabled());
-//
-//            userRepository.save(user);
-//            return new ApiResponse<>(200, "User added successfully.", new UserDTOMapper().apply(user));
-//        } catch (ResourceNotFoundException e) {
-//            logger.error("Error blocking user: {}", e.getMessage());
-//            return new ApiResponse<>(404, "There is no user with this ID.", null);
-//        } catch (Exception e) {
-//            logger.error("Error blocking user: {}", e.getMessage());
-//            return new ApiResponse<>(500, "Server error please try again later!", null);
-//        }
-//    }
+
 
 }

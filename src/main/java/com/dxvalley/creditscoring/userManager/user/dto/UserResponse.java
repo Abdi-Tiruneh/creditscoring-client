@@ -19,9 +19,10 @@ public class UserResponse {
     private String organizationId;
     private String lastLogin;
     private String role;
+    private String enabled;
+    private String status;
     private String createdAt;
     private String updatedAt;
     private String createdBy;
     private String updatedBy;
-    private String enabled;
 }
