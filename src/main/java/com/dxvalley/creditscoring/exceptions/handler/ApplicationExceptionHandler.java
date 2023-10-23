@@ -1,6 +1,8 @@
 package com.dxvalley.creditscoring.exceptions.handler;
 
 import com.dxvalley.creditscoring.exceptions.customExceptions.*;
+import com.dxvalley.creditscoring.exceptions.exceptionUtils;
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -44,6 +46,27 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleBadRequestException(Exception ex, HttpServletRequest request) {
         return buildResponse(ex.getMessage(), request, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<Object> handleFeignException(FeignException ex, HttpServletRequest request) {
+
+        HttpStatus httpStatus = HttpStatus.valueOf(ex.status());
+        String errorMessage = exceptionUtils.extractErrorMessage(ex.getMessage());
+        ExceptionResponse apiException = new ExceptionResponse(
+                LocalDateTime.now().toString(),
+                httpStatus,
+                errorMessage,
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(httpStatus).body(apiException);
+    }
+
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ExceptionResponse> handleServiceUnavailableException(ServiceUnavailableException ex, HttpServletRequest request) {
+        return buildResponse(ex.getMessage(), request, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
 
     @ExceptionHandler({UnauthorizedException.class, BannedUserException.class})
     public ResponseEntity<ExceptionResponse> handleUnauthorizedException(Exception ex, HttpServletRequest request) {
