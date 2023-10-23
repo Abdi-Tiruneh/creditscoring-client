@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 public class JwtTokenUtil {
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000; // one week
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000 * 2; // two week
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 30L * 24L * 60L * 60L * 1000L; // 1 month
     public static String SECRET_KEY;
     private static CustomUserDetailsService customUserDetailsService;
