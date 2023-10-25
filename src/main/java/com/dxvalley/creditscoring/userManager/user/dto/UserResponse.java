@@ -25,4 +25,5 @@ public class UserResponse {
     private String updatedAt;
     private String createdBy;
     private String updatedBy;
+    private Boolean isDeleted;
 }

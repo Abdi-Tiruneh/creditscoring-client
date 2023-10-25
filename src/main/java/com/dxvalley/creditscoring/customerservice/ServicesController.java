@@ -36,7 +36,7 @@ public class ServicesController {
         return customerServiceFeignClient.getService(id);
     }
 
-    @GetMapping("/{id}/tellers")
+    @GetMapping("/{id}/tellers")    
     public ResponseEntity<List<UserResponse>> getServiceTellers(@PathVariable Long id) {
         List<UserResponse> tellers = tellerServiceMappingService.getServiceTellers(id);
         return ResponseEntity.ok(tellers);

@@ -29,7 +29,7 @@ public class TellerServiceMappingServiceImpl implements TellerServiceMappingServ
         if (users.stream().anyMatch(user -> !user.getRole().getName().equals("TELLER"))) {
             throw new BadRequestException("Only tellers have access to specific services. Other users can view all services.");
         }
-
+        
         List<TellerServiceMapping> tellerServiceMappings = users.stream().map(user -> {
             TellerServiceMapping tellerServiceMapping = tellerServiceMappingRepository
                     .findByUserId(user.getId())
@@ -58,11 +58,12 @@ public class TellerServiceMappingServiceImpl implements TellerServiceMappingServ
             throw new ResourceNotFoundException("No teller is assigned to this service.");
 
 
-        // Map TellerServiceMapping to UserResponse.
+        // Map TellerServiceMapping to UserResponse. 
+        // check if user is deleted
         return tellerServiceMappings.stream()
                 .map(tellerServiceMapping -> UserMapper.toUserResponse(tellerServiceMapping.getUser()))
+                .filter(userResponse -> !userResponse.getIsDeleted())
                 .toList();
-
     }
 
 }

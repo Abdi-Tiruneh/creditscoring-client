@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService {
         user.setDeleteBy(currentLoggedInUser.getUser().getFullName());
 
         userRepository.save(user);
-        return ApiResponse.success("Password Changed Successfully!");
+        return ApiResponse.success("User Deleted Successfully!");
     }
 
 //

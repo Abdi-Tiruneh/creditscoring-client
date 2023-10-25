@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,9 +75,14 @@ public class UserUtils {
     public List<Users> findAllById(List<Long> userIds) {
 
         List<Users> users = userRepository.findAllById(userIds);
+
+        List<Users> nonDeletedUsers = users.stream()
+                                            .filter(user -> !user.isDeleted())
+                                            .collect(Collectors.toList());
+
         if (users.isEmpty())
             throw new ResourceNotFoundException("No Users found for the provided IDs");
 
-        return users;
+        return nonDeletedUsers;
     }
 }

@@ -18,6 +18,7 @@ public class UserMapper {
                 .updatedBy(user.getUpdatedBy())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .isDeleted(user.isDeleted())
                 .build();
     }
 }
