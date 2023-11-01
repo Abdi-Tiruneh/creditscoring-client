@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.dxvalley.creditscoring.score.dto.CustomerServiceResponse;
+
 import java.util.List;
 
 @FeignClient(name = "CustomerService", url = "http://localhost:8888/api/v1/services")
@@ -22,5 +24,5 @@ public interface CustomerServiceFeignClient {
     ResponseEntity<?> toggleServicesStatus(@PathVariable Long id);
 
     @GetMapping("/{id}")
-    ResponseEntity<?> getService(@PathVariable Long id);
+    ResponseEntity<CustomerServiceResponse> getService(@PathVariable Long id);
 }

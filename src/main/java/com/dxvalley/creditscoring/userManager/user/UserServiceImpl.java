@@ -65,6 +65,7 @@ public class UserServiceImpl implements UserService {
         Users user = userUtils.createUser(ownerReq, role);
 
         Users savedUser = userRepository.save(user);
+
         return UserMapper.toUserResponse(savedUser);
     }
 
@@ -76,7 +77,6 @@ public class UserServiceImpl implements UserService {
                 .map(UserMapper::toUserResponse)
                 .toList();
     }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)

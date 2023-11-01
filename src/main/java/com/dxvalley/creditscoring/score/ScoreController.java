@@ -16,7 +16,7 @@ public class ScoreController {
 
     private final ScoreService scoreService;
 
-    @PostMapping("/get")
+    @PostMapping
     public ResponseEntity<?> getCustomerScore(@RequestBody @Valid ScoreReq scoreReq) {
         return scoreService.calculateScore(scoreReq);
     }
