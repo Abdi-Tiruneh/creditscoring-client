@@ -1,5 +1,7 @@
 package com.dxvalley.creditscoring.score.dto;
 
+import java.util.List;
+
 import com.dxvalley.creditscoring.utils.Status;
 import lombok.Data;
 
@@ -9,11 +11,9 @@ public class CustomerServiceResponse {
 
     private String name;
 
-    private String path;
-
     private String description;
 
-    private Status modelStatus;
+    private Status serviceStatus;
 
     private String addedBy;
 
@@ -22,4 +22,8 @@ public class CustomerServiceResponse {
     private String updatedBy;
 
     private String updatedAt;
+
+    private List<ModelResponse> models;
 }
+
+

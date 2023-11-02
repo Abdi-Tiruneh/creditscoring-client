@@ -45,7 +45,7 @@ public class ScoreService {
         if (modelResponse.getModelStatus() == Status.BLOCKED)
             throw new ServiceUnavailableException();
         
-        // get account, date, and modelId then request cb for data and feed the data to the model path and retun the score 
+        // get account, date, and modelId then request cb for data and feed the data to the model path and return the score 
         // response for frontend
         try {
             RestTemplate restTemplate = new RestTemplate();

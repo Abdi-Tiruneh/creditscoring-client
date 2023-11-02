@@ -18,14 +18,16 @@ public class BusinessRuleServiceImpl implements BusinessRuleService {
 
         List<BusinessRule> businessRules = createBusinessRoles(businessRuleReqList);
 
+        // delete all existing rules and create new one by serviceId
+        businessRuleRepository.deleteByServiceId(businessRuleReqList.get(0).getServiceId());
+
         return businessRuleRepository.saveAll(businessRules);
     }
 
     //TODO: force min and max score validations. Make them not repeat a given service.
 
     List<BusinessRule> createBusinessRoles(List<BusinessRuleReq> businessRuleReqList) {
-        // delete all existing rules and create new one
-        businessRuleRepository.deleteAll();
+        
 
         List<BusinessRule> businessRules = new ArrayList<>();
 
